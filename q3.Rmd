@@ -1,0 +1,117 @@
+### Question 3
+
+#### Example 5.7
+
+To calculate the force of mortality, using the Poisson model. Set the loglikelihood function. 
+
+For  Gompertz¡¯ Law, $\mu=Bc^x$
+
+Obtain the start point of b and c through linear regression. 
+
+Find the minimized value of the function to obtain the value of b and c.Then obtain the graduated estimates of force of mortality.
+
+```{r}
+age<-seq(70,75,1)
+ECx<-c(1000,1005,1010,1008,1006,998)
+dx<-c(80,90,95,105,115,125)
+crude<-dx/ECx
+
+fn<-function(theta){
+  -sum(-ECx*theta[1]*theta[2]^age+dx*log(ECx*theta[1]*(theta[2]^age)))
+  }
+  
+  
+lm(log(crude)~age)
+b1<-exp(-8.67325)
+c1<-exp(0.08788)
+b1
+c1
+
+estimate<-nlm(fn,c(b1,c1))
+b<-estimate$estimate[1]
+c<-estimate$estimate[2]
+
+mu<-b*c^age
+mu
+```
+
+
+
+#### Example 5.8
+
+To calculate the force of mortality, using the Binomial model.
+
+Calculate the crude estimates of q.
+
+Set th function. The weight is the initial exposed to risk.
+
+Obtain the start point of a and b through linear regression. 
+
+Find the minimized value of the function to obtain the value of b and c.Then obtain the graduated estimates of mortality rate.
+
+```{r}
+age<-seq(30,49,1)
+Ex<-c(70000,66672,68375,65420,61779,66091,68514,69560,65000,66279,
+      67300,65368,65391,62917,66537,62302,62145,63856,61097,61110)
+dx<-c(39,43,34,31,23,50,48,43,48,47,
+      62,63,84,86,120,121,122,162,151,184)
+crudeqx<-dx/Ex
+Wx<-Ex
+
+fn<-function(theta){sum(Wx*(log(crudeqx/(1-crudeqx))-(theta[1]+theta[2]*age))^2)}
+
+lm(log(crudeqx/(1-crudeqx))~age)
+a1<--10.8629
+b1<-0.1003
+
+estimate<-nlm(fn,c(a1,b1))
+estimate
+a<-estimate$estimate[1]
+b<-estimate$estimate[2]
+
+graduatedqx<-exp(a+b*age)/(1+ exp(a+b*age))
+graduatedqx
+
+```
+
+#### Exmple 5.9
+
+To calculate the force of mortality, using the Binomial model.
+
+Calculate the crude estimates of q.
+
+Set th function. The weight is the initial exposed to risk.
+
+Obtain the start point of a and b through linear regression. 
+
+Find the minimized value of the function to obtain the value of b and c.Then obtain the graduated estimates of mortality rate.
+
+```{r}
+Ex<-c(166,187,218,243,276,302,347,
+      390,430,494,558,628,701,813,
+      917,1040,1182,1299,1432,1596,1752)
+dx<-c(2,2,4,6,2,4,7,
+      3,9,9,8,11,14,18,
+      18,24,30,43,41,54,64)
+qSx<-c(0.00505,0.00570,0.00644,0.00728,0.00826,0.00930,0.01051,
+       0.01184,0.01331,0.01492,0.01668,0.01859,0.02065,0.02287,
+       0.02525,0.02778,0.03049,0.03339,0.03648,0.03978,0.04332)
+crudeqx<-dx/Ex
+Wx<-Ex
+
+fn <- function(theta){sum(Wx*(crudeqx-(theta[1]+theta[2]*qSx))^2)}
+
+lm(crudeqx~qSx)
+a1<-0.009279
+b1<-0.570217
+
+estimate<-nlm(fn,c(a1,b1))
+estimate
+
+a<-estimate$estimate[1]
+b<-estimate$estimate[2]
+
+graduatedqx<-a+b*qSx
+graduatedqx
+  
+```

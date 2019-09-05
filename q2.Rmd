@@ -1,0 +1,112 @@
+### Question 2
+
+Calculate the crude and graduated estimates of mortality rate.
+
+To estimate mortality rate, use Binomial model. Calculate the standardised deviation z score.
+
+```{r}
+Ex<-c(15518,19428,21594,21890,19174,15775,11414,6993,3276,1096,201)
+actualdeath<-c(65,144,219,378,465,557,685,644,471,217,67)
+expecteddeath<-c(73.9,134.6,223.9,346.3,468.1,600.2,675.5,637.4,458.7,240.6,61.4)
+
+crudeqx<-actualdeath/Ex
+graduatedqx<-expecteddeath/Ex
+zx<-(actualdeath-expecteddeath)/sqrt(expecteddeath*(1-graduatedqx))
+zx
+```
+
+#### (a) chi-squared test
+
+$$\sum_{allages}{z_x^2}$$
+
+Using chi square test to check whether graduated estimates are close to data. Calculate the sum of z score square.
+
+The result is smaller than the value of $\chi^2(0.95)$ .Degree of freedom is 10. Therefore, null hypothesis is not rejected and adherence to data is good.
+
+```{r}
+zx2<-(zx)^2
+CST<-sum(zx2)
+CST
+qchisq(0.95,10)
+```
+
+#### (b) standard deviations test
+
+$$\sum_{allages}\frac{(A-E)^2}E$$
+
+Divide the 11 z score in 4 intervals, using standard deviations test.
+
+The result is smaller than the value of $\chi^2(0.95)$ .Degree of freedom is 3. Therefore, null hypothesis is not rejected and adherence to data is good.
+
+```{r}
+c=data.frame(zx)
+Ainterval1<-length(c[c$zx<(-1),1])
+Ainterval2<-length(c[c$zx<0&c$zx>-1,1])
+Ainterval3<-length(c[c$zx<1&c$zx>0,1])
+Ainterval4<-length(c[c$zx>1,1])
+A<-c(Ainterval1,Ainterval2,Ainterval3,Ainterval4)
+E<-11*c(pnorm(-1),pnorm(0)-pnorm(-1),pnorm(1)-pnorm(0),1-pnorm(1))
+SDT<-sum((A-E)^2/E)
+SDT
+qchisq(0.95,3)
+```
+
+#### (c) Cumulative Deviations Test
+
+$$\frac{\sum_x(d_x-Exq_x)}{\sqrt{\sum_x{Exqx(1-q_x)}}}$$
+
+The of absolute value of result is smaller than 1.96. Therefore, null hypothesis is not rejected and adherence to data is good.
+
+```{r}
+CDT<-abs(sum(actualdeath-expecteddeath)/sqrt(sum(expecteddeath*(1-graduatedqx))))
+CDT
+qnorm(0.975)
+```
+
+#### (d) Signs Test
+
+The number of positive z score should be Binomial distributed. Doing binomial test and the p value is 1, which is larger than 0.05. Null hypothesis is not rejected and is a Binomial distribuion.
+
+Meanwhile, calculate smallest possible value k. The number of positive z score is smaller than m ¨C k and larger than k, so the adherence to data is good.
+
+```{r}
+ST<-length(c[c$zx> 0,1])
+ST
+k<-qbinom(0.025,11,0.5)
+k
+binom.test(ST,11,0.5,"two.sided")
+```
+
+#### (e) Grouping of Signs Test
+
+It is oberved that the number of distinct groups of positive z score is 4. Calculate the smallest possible value k. The number of distinct groups of positive z score is larger than k, z score is standard normal, so null hypothesis is not rejected and adherence to data is good.
+
+```{r}
+n=4
+n
+n1<-length(c[c$zx> 0,1])
+n2<-length(c[c$zx< 0,1])
+fn<-function(j){sum(choose(n1-1,j-1)*choose(n2+1,j)/choose(n1+n2,n1))}
+
+temp<-fn(1)
+for (j in 1:11) {
+  if(temp<0.05){
+    temp<-temp+fn(j)  
+  }else{
+    break("")
+  }
+}
+j
+```
+
+#### (f) Serial Correlations Test
+
+The absolute value of result is smaller than 1.96. Therefore, null hypothesis is not rejected and adherence to data is good.
+
+```{r}
+z1<-sum(zx[1:10]/(11-1))
+z2<-sum(zx[2:11]/(11-1))
+SCT<-abs(sum((zx[1:10]-z1)*(zx[2:11]-z2))*sqrt(11-1)/sqrt(sum((zx[1:10]-z1)^2)*(sum((zx[2:11]-z2)^2))))
+SCT
+qnorm(0.975)
+```

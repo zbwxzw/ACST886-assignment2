@@ -1,0 +1,42 @@
+### question 1
+
+#### part(a)
+
+Calculate initial exposed to risk.
+Life G and life J died during their insuring age 30, so $d_30$ is 2
+Life B died before age 30 and the withdrawal date of life F is at age 30.
+
+```{r}
+d30<-2
+E30<-8
+q30<-d30/E30
+q30
+```
+
+
+#### part(b)
+
+Calculate central exposed to risk to obtain $\mu_30$, then obtain $q_30$
+Life G and life J died during their insuring age 30.
+
+```{r}
+library("lubridate")
+
+PA30_G<-"1995-10-29"
+PA30_J<-"1996-03-06"
+PA30<-c(PA30_G,PA30_J)
+
+deathdate_G<-"1996-04-21"
+deathdate_J<-"1997-02-17"
+deathdate<-c(deathdate_G,deathdate_J)
+
+c<-(time_length(difftime(deathdate,PA30),"days"))
+c/365.25
+
+d30<-2
+E30_c<-1+0+1+1+1+0+0.4791+1+1+0.9528
+mu30<-d30/E30_c
+mu30
+q30<-1-exp(-mu30)
+q30
+```
